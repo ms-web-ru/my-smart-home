@@ -1,6 +1,8 @@
 package com.example.mysmarthome3;
 
 import android.os.Bundle;
+import android.os.Looper;
+import android.view.Window;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -13,6 +15,13 @@ import androidx.navigation.ui.NavigationUI;
 public class MainActivity extends AppCompatActivity {
 
     public static boolean[] btnStates = new boolean[7];
+
+
+    interface Callback{
+        void callingBack();
+    }
+    Callback callback;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +44,22 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
+    }
+
+    public void registerCallBack(Callback callback){
+        this.callback = callback;
+    }
+
+
+    public void setTimeout (final Callback callback, int timeout) {
+        new android.os.Handler(Looper.getMainLooper()).postDelayed(
+                new Runnable() {
+                    public void run() {
+                        callback.callingBack();
+                    }
+                },
+                timeout);
+
     }
 
 }

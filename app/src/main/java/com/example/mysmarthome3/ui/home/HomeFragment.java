@@ -8,18 +8,22 @@ package com.example.mysmarthome3.ui.home;
 import android.annotation.SuppressLint;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.ImageButton;
+import android.widget.SeekBar;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 
+import com.example.mysmarthome3.MainActivity;
 import com.example.mysmarthome3.R;
 
 import static com.example.mysmarthome3.MainActivity.btnStates;
@@ -37,7 +41,14 @@ public class HomeFragment extends Fragment {
     private ImageButton btnLivingroomSpots;
     private ImageButton btnKitchen;
     private ImageButton btnKitchenSpots;
+
+    private SeekBar lightPower;
+
+    private TextView messageText;
+
     private long touchStartTime;
+    private boolean isSeekBarCalled = false;
+    private boolean isSeekBarStopped = true;
 
     @SuppressLint("WrongViewCast")
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -49,7 +60,11 @@ public class HomeFragment extends Fragment {
         img_off = ResourcesCompat.getDrawable(getResources(), R.mipmap.lamp_foreground, null);
         img_on = ResourcesCompat.getDrawable(getResources(), R.mipmap.lamp_on_foreground, null);
 
+        lightPower = (SeekBar) root.findViewById(R.id.lightPower);
+        messageText = (TextView) root.findViewById(R.id.messageText);
+
         setBtnsListeners(root);
+        setLightPowerListener();
 
         ViewTreeObserver viewTreeObserver = root.getViewTreeObserver();
         viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -61,6 +76,48 @@ public class HomeFragment extends Fragment {
 
 
         return root;
+    }
+
+    void setLightPowerListener() {
+        lightPower.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                messageText.setText((progress * 10) + "%");
+                messageText.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // если отпустили и в течение 2х секунд начали двигать этот флаг не даст убрать ползунок
+                isSeekBarStopped = false;
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                // ставим флаг что отпустили палец
+                isSeekBarStopped = true;
+                hideLightPowerBarTimeout();
+            }
+        });
+    }
+
+    void hideLightPowerBarTimeout() {
+        if (lightPower.getVisibility() == View.INVISIBLE) {
+            return;
+        }
+        new android.os.Handler(Looper.getMainLooper()).postDelayed(
+                new Runnable() {
+                    public void run() {
+                        if (isSeekBarStopped) {
+                            lightPower.setVisibility(View.INVISIBLE);
+                            messageText.setVisibility(View.INVISIBLE);
+                        }
+                        else {
+                            hideLightPowerBarTimeout();
+                        }
+                    }
+                },
+                2000);
     }
 
     /**
@@ -157,6 +214,10 @@ public class HomeFragment extends Fragment {
      * @param btnIdx
      */
     void onBtnClick(ImageButton btn, int btnIdx) {
+        if (isSeekBarCalled) {
+            isSeekBarCalled = false;
+            return;
+        }
         boolean state = getBtnState(btnIdx);
         if (!state) {
             btn.setImageDrawable(img_on);
@@ -187,13 +248,22 @@ public class HomeFragment extends Fragment {
             case MotionEvent.ACTION_CANCEL:
                 long totalTime = System.currentTimeMillis() - touchStartTime;
                 long totalSecunds = totalTime / 1000;
-                if (totalSecunds >= 3) {
+                if (totalSecunds >= 1) {
                     //ВОТ тут прошло 3 или больше секунды с начала нажатия
                     //можно что-то запустить
-                    System.out.println("Три секунды прошло с нажатия!");
+                    showLightPowerBar();
+                    isSeekBarCalled = true;
                 }
                 break;
         }
+    }
+
+    private void showLightPowerBar() {
+        lightPower.setVisibility(View.VISIBLE);
+    }
+
+    private void hideLightPowerBar() {
+        lightPower.setVisibility(View.INVISIBLE);
     }
 
 }
