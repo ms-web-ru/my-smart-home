@@ -147,13 +147,14 @@ public class HomeFragment extends Fragment {
 		btnLivingroomSpots = (ImageButton) root.findViewById(R.id.btnLivingroomSpots);
 		btnKitchen = (ImageButton) root.findViewById(R.id.btnKitchen);
 		btnKitchenSpots = (ImageButton) root.findViewById(R.id.btnKitchenSpots);
+
 		imageButtons[0] = hallway;
 		imageButtons[1] = btnToilet;
 		imageButtons[2] = btnBedroom;
 		imageButtons[3] = btnLivingroom;
 		imageButtons[4] = btnLivingroomSpots;
 		imageButtons[5] = btnKitchen;
-		imageButtons[6] = btnLivingroomSpots;
+		imageButtons[6] = btnKitchenSpots;
 
 		for (int i = 0, ln = imageButtons.length; i < ln; i++) {
 			final int fI = i;
