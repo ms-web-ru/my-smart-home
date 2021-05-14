@@ -41,6 +41,7 @@ public class HomeFragment extends Fragment {
 	private ImageButton btnLivingroomSpots;
 	private ImageButton btnKitchen;
 	private ImageButton btnKitchenSpots;
+	private static ImageButton[] imageButtons = new ImageButton[7];
 
 	private SeekBar lightPower;
 
@@ -127,13 +128,9 @@ public class HomeFragment extends Fragment {
 	 * Устанавливает активное состояние включенным кнопкам
 	 */
 	void setBtnsStates() {
-		hallway.setImageDrawable(btnStates[0] ? img_on : img_off);
-		btnToilet.setImageDrawable(btnStates[1] ? img_on : img_off);
-		btnBedroom.setImageDrawable(btnStates[2] ? img_on : img_off);
-		btnLivingroom.setImageDrawable(btnStates[3] ? img_on : img_off);
-		btnLivingroomSpots.setImageDrawable(btnStates[4] ? img_on : img_off);
-		btnKitchen.setImageDrawable(btnStates[5] ? img_on : img_off);
-		btnKitchenSpots.setImageDrawable(btnStates[6] ? img_on : img_off);
+		for (int i = 0, ln = imageButtons.length; i < ln; i++) {
+			imageButtons[i].setImageDrawable(btnStates[i] ? img_on : img_off);
+		}
 	}
 
 	/**
@@ -141,73 +138,40 @@ public class HomeFragment extends Fragment {
 	 *
 	 * @param root
 	 */
+	@SuppressLint("ClickableViewAccessibility")
 	void setBtnsListeners(View root) {
 		hallway = (ImageButton) root.findViewById(R.id.btnHallway);
-		hallway.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				onBtnClick(hallway, 0);
-			}
-		});
-		hallway.setOnTouchListener(new View.OnTouchListener() {
-			@SuppressLint("ClickableViewAccessibility")
-			@Override
-			public boolean onTouch(View v, MotionEvent event) {
-				onBtnTouch(v, event);
-				return false;
-			}
-		});
-
-
 		btnToilet = (ImageButton) root.findViewById(R.id.btnToilet);
-		btnToilet.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				onBtnClick(btnToilet, 1);
-			}
-		});
-
 		btnBedroom = (ImageButton) root.findViewById(R.id.btnBedroom);
-		btnBedroom.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				onBtnClick(btnBedroom, 2);
-			}
-		});
-
 		btnLivingroom = (ImageButton) root.findViewById(R.id.btnLivingroom);
-		btnLivingroom.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				onBtnClick(btnLivingroom, 3);
-			}
-		});
-
 		btnLivingroomSpots = (ImageButton) root.findViewById(R.id.btnLivingroomSpots);
-		btnLivingroomSpots.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				onBtnClick(btnLivingroomSpots, 4);
-			}
-		});
-
 		btnKitchen = (ImageButton) root.findViewById(R.id.btnKitchen);
-		btnKitchen.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				onBtnClick(btnKitchen, 5);
-			}
-		});
-
 		btnKitchenSpots = (ImageButton) root.findViewById(R.id.btnKitchenSpots);
-		btnKitchenSpots.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				onBtnClick(btnKitchenSpots, 6);
-			}
-		});
+		imageButtons[0] = hallway;
+		imageButtons[1] = btnToilet;
+		imageButtons[2] = btnBedroom;
+		imageButtons[3] = btnLivingroom;
+		imageButtons[4] = btnLivingroomSpots;
+		imageButtons[5] = btnKitchen;
+		imageButtons[6] = btnLivingroomSpots;
 
+		for (int i = 0, ln = imageButtons.length; i < ln; i++) {
+			final int fI = i;
+			imageButtons[i].setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					onBtnClick(imageButtons[fI], fI);
+				}
+			});
 
+			imageButtons[i].setOnTouchListener(new View.OnTouchListener() {
+				@Override
+				public boolean onTouch(View v, MotionEvent event) {
+					onBtnTouch(v, event, fI);
+					return false;
+				}
+			});
+		}
 	}
 
 	/**
@@ -240,7 +204,7 @@ public class HomeFragment extends Fragment {
 		return btnStates[btnIdx];
 	}
 
-	void onBtnTouch(View v, MotionEvent event) {
+	void onBtnTouch(View v, MotionEvent event, int btnIdx) {
 		switch (event.getAction()) {
 			case MotionEvent.ACTION_DOWN: // нажатие
 				touchStartTime = System.currentTimeMillis();
