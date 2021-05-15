@@ -1,8 +1,13 @@
 package com.example.mysmarthome3;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Looper;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
+import android.view.View;
+
 import io.socket.engineio.client.transports.WebSocket;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -28,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
     public static boolean[] btnStates = new boolean[7];
     private Socket mSocket;
     private MainActivity mContext;
-
+    public static SharedPreferences preferences;
 
 
     private final Emitter.Listener onNewMessage = new Emitter.Listener() {
@@ -53,19 +58,9 @@ public class MainActivity extends AppCompatActivity {
             });
         }
     };
+    private Intent intent;
 
-    {
-        try {
-            IO.Options opts = new IO.Options();
-            opts.transports = new String[] { WebSocket.NAME };
-            mSocket = IO.socket("https://ms-chat.ru:8001", opts);
-            mSocket.connect();
-            mSocket.on("message", onNewMessage);
-            mSocket.emit("attach_event", "asdwefw");
 
-        } catch (URISyntaxException e) {
-        }
-    }
 
     interface Callback{
         void callingBack();
@@ -78,6 +73,22 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mContext = this;
+        preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+
+        {
+            try {
+                IO.Options opts = new IO.Options();
+                opts.transports = new String[] { WebSocket.NAME };
+                String url = preferences.getString("messagerUrl", "");
+                mSocket = IO.socket(url, opts);
+                mSocket.connect();
+                mSocket.on("message", onNewMessage);
+                mSocket.emit("attach_event", "asdwefw");
+
+            } catch (URISyntaxException e) {
+            }
+        }
+
         btnStates[0] = false;
         btnStates[1] = false;
         btnStates[2] = false;
@@ -126,6 +137,12 @@ public class MainActivity extends AppCompatActivity {
         }
         mSocket.emit("new message", message);
     }
+
+    public void settingActivity(View v) {
+        intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+    }
+
 
     @Override
     public void onDestroy() {
